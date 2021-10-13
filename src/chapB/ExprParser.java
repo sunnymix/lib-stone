@@ -9,28 +9,28 @@ public class ExprParser {
     public ExprParser(Lexer p) {
         lexer = p;
     }
-    public ASTree expression() throws ParseException {
-        ASTree left = term();
+    public AstTree expression() throws ParseException {
+        AstTree left = term();
         while (isToken("+") || isToken("-")) {
-            ASTLeaf op = new ASTLeaf(lexer.read());
-            ASTree right = term();
+            AstLeaf op = new AstLeaf(lexer.read());
+            AstTree right = term();
             left = new BinaryExpr(Arrays.asList(left, op, right));
         }
         return left;
     }
-    public ASTree term() throws ParseException {
-        ASTree left = factor();
+    public AstTree term() throws ParseException {
+        AstTree left = factor();
         while (isToken("*") || isToken("/")) {
-            ASTLeaf op = new ASTLeaf(lexer.read());
-            ASTree right = factor();
+            AstLeaf op = new AstLeaf(lexer.read());
+            AstTree right = factor();
             left = new BinaryExpr(Arrays.asList(left, op, right));
         }
         return left;
     }
-    public ASTree factor() throws ParseException {
+    public AstTree factor() throws ParseException {
         if (isToken("(")) {
             token("(");
-            ASTree e = expression();
+            AstTree e = expression();
             token(")");
             return e;
         }
@@ -57,7 +57,7 @@ public class ExprParser {
     public static void main(String[] args) throws ParseException {
         Lexer lexer = new Lexer(new CodeDialog());
         ExprParser p = new ExprParser(lexer);
-        ASTree t = p.expression();
+        AstTree t = p.expression();
         System.out.println("=> " + t);
     }
 }

@@ -1,9 +1,17 @@
 package stone.ast;
+
 import java.util.List;
 
-public class NegativeExpr extends ASTList {
-    public NegativeExpr(List<ASTree> c) { super(c); }
-    public ASTree operand() { return child(0); }
+// OK
+public class NegativeExpr extends AstList {
+    public NegativeExpr(List<AstTree> c) {
+        super(c);
+    }
+
+    public AstTree operand() {
+        return child(0);
+    }
+
     public String toString() {
         return "-" + operand();
     }

@@ -2,14 +2,14 @@ package chap14;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import stone.ast.ASTree;
+import stone.ast.AstTree;
 import javassist.gluonj.Reviser;
 import chap14.TypeInfo.UnknownType;
 
 @Reviser public class InferTypes {
     @Reviser public static class TypeInfoEx extends TypeInfo {
         @Override
-        public void assertSubtypeOf(TypeInfo type, TypeEnv tenv, ASTree where)
+        public void assertSubtypeOf(TypeInfo type, TypeEnv tenv, AstTree where)
             throws TypeException
         {
             if (type.isUnknownType())
@@ -37,14 +37,14 @@ import chap14.TypeInfo.UnknownType;
         public void setType(TypeInfo t) { type = t; }
         @Override public TypeInfo type() { return type == null ? ANY : type; }
         @Override public void assertSubtypeOf(TypeInfo t, TypeEnv tenv,
-                                            ASTree where) throws TypeException
+                                            AstTree where) throws TypeException
         {
             if (resolved())
                 type.assertSubtypeOf(t, tenv, where);
             else
                 ((TypeEnvEx)tenv).addEquation(this, t);
         }
-        public void assertSupertypeOf(TypeInfo t, TypeEnv tenv, ASTree where)
+        public void assertSupertypeOf(TypeInfo t, TypeEnv tenv, AstTree where)
             throws TypeException
         {
             if (resolved())

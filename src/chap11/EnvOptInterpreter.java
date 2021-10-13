@@ -8,8 +8,8 @@ import stone.CodeDialog;
 import stone.Lexer;
 import stone.ParseException;
 import stone.Token;
-import stone.ast.ASTree;
-import stone.ast.NullStmnt;
+import stone.ast.AstTree;
+import stone.ast.NullState;
 
 public class EnvOptInterpreter {
     public static void main(String[] args) throws ParseException {
@@ -21,11 +21,11 @@ public class EnvOptInterpreter {
     {
         Lexer lexer = new Lexer(new CodeDialog());
         while (lexer.peek(0) != Token.EOF) {
-            ASTree t = bp.parse(lexer);
-            if (!(t instanceof NullStmnt)) {
-                ((EnvOptimizer.ASTreeOptEx)t).lookup(
+            AstTree t = bp.parse(lexer);
+            if (!(t instanceof NullState)) {
+                ((EnvOptimizer.AstTreeOptEx)t).lookup(
                         ((EnvOptimizer.EnvEx2)env).symbols());
-                Object r = ((BasicEvaluator.ASTreeEx)t).eval(env);
+                Object r = ((BasicEvaluator.AstTreeEx)t).eval(env);
                 System.out.println("=> " + r);
             }
         }

@@ -2,8 +2,8 @@ package chap13;
 import static chap13.Opcode.*;
 import chap8.NativeFunction;
 import stone.StoneException;
-import stone.ast.ASTree;
-import stone.ast.ASTList;
+import stone.ast.AstTree;
+import stone.ast.AstList;
 import java.util.ArrayList;
 
 public class StoneVM {
@@ -144,7 +144,7 @@ public class StoneVM {
             for (int i = 0; i < numOfArgs; i++)
                 args[i] = stack[sp + i];
             stack[sp] = ((NativeFunction)value).invoke(args,
-                                        new ASTList(new ArrayList<ASTree>()));
+                                        new AstList(new ArrayList<AstTree>()));
             pc += 3;
         }
         else

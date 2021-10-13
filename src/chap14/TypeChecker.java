@@ -9,7 +9,7 @@ import javassist.gluonj.*;
 
 @Require(TypedEvaluator.class)
 @Reviser public class TypeChecker {
-    @Reviser public static abstract class ASTreeTypeEx extends ASTree {
+    @Reviser public static abstract class AstTreeTypeEx extends AstTree {
         public TypeInfo typeCheck(TypeEnv tenv) throws TypeException {
             return null;
         }
@@ -52,23 +52,23 @@ import javassist.gluonj.*;
         }
     }
     @Reviser public static class NegativeEx extends NegativeExpr {
-        public NegativeEx(List<ASTree> c) { super(c); }
+        public NegativeEx(List<AstTree> c) { super(c); }
         public TypeInfo typeCheck(TypeEnv tenv) throws TypeException {
-            TypeInfo t = ((ASTreeTypeEx)operand()).typeCheck(tenv);
+            TypeInfo t = ((AstTreeTypeEx)operand()).typeCheck(tenv);
             t.assertSubtypeOf(TypeInfo.INT, tenv, this);
             return TypeInfo.INT;
         }
     }
     @Reviser public static class BinaryEx extends BinaryExpr {
         protected TypeInfo leftType, rightType;
-        public BinaryEx(List<ASTree> c) { super(c); }
+        public BinaryEx(List<AstTree> c) { super(c); }
         public TypeInfo typeCheck(TypeEnv tenv) throws TypeException {
             String op = operator();
             if ("=".equals(op))
                 return typeCheckForAssign(tenv);
             else {
-                leftType = ((ASTreeTypeEx)left()).typeCheck(tenv);
-                rightType = ((ASTreeTypeEx)right()).typeCheck(tenv);
+                leftType = ((AstTreeTypeEx)left()).typeCheck(tenv);
+                rightType = ((AstTreeTypeEx)right()).typeCheck(tenv);
                 if ("+".equals(op))
                     return leftType.plus(rightType, tenv);
                 else if ("==".equals(op))
@@ -83,53 +83,53 @@ import javassist.gluonj.*;
         protected TypeInfo typeCheckForAssign(TypeEnv tenv)
             throws TypeException
         {
-            rightType = ((ASTreeTypeEx)right()).typeCheck(tenv);
-            ASTree le = left();
+            rightType = ((AstTreeTypeEx)right()).typeCheck(tenv);
+            AstTree le = left();
             if (le instanceof Name)
                 return ((NameEx2)le).typeCheckForAssign(tenv, rightType);
             else
                 throw new TypeException("bad assignment", this);
         }
     }
-    @Reviser public static class BlockEx extends BlockStmnt {
+    @Reviser public static class BlockEx extends BlockState {
         TypeInfo type;
-        public BlockEx(List<ASTree> c) { super(c); }
+        public BlockEx(List<AstTree> c) { super(c); }
         public TypeInfo typeCheck(TypeEnv tenv) throws TypeException {
             type = TypeInfo.INT;
-            for (ASTree t: this)
-                if (!(t instanceof NullStmnt))
-                    type = ((ASTreeTypeEx)t).typeCheck(tenv);
+            for (AstTree t: this)
+                if (!(t instanceof NullState))
+                    type = ((AstTreeTypeEx)t).typeCheck(tenv);
             return type;
         }
     }
-    @Reviser public static class IfEx extends IfStmnt {
-        public IfEx(List<ASTree> c) { super(c); }
+    @Reviser public static class IfEx extends IfState {
+        public IfEx(List<AstTree> c) { super(c); }
         public TypeInfo typeCheck(TypeEnv tenv) throws TypeException {
-            TypeInfo condType = ((ASTreeTypeEx)condition()).typeCheck(tenv);
+            TypeInfo condType = ((AstTreeTypeEx)condition()).typeCheck(tenv);
             condType.assertSubtypeOf(TypeInfo.INT, tenv, this);
-            TypeInfo thenType = ((ASTreeTypeEx)thenBlock()).typeCheck(tenv);
+            TypeInfo thenType = ((AstTreeTypeEx)thenBlock()).typeCheck(tenv);
             TypeInfo elseType;
-            ASTree elseBk = elseBlock();
+            AstTree elseBk = elseBlock();
             if (elseBk == null)
                 elseType = TypeInfo.INT; 
             else
-                elseType = ((ASTreeTypeEx)elseBk).typeCheck(tenv);
+                elseType = ((AstTreeTypeEx)elseBk).typeCheck(tenv);
             return thenType.union(elseType, tenv);
         }
     }
-    @Reviser public static class WhileEx extends WhileStmnt {
-        public WhileEx(List<ASTree> c) { super(c); }
+    @Reviser public static class WhileEx extends WhileState {
+        public WhileEx(List<AstTree> c) { super(c); }
         public TypeInfo typeCheck(TypeEnv tenv) throws TypeException {
-            TypeInfo condType = ((ASTreeTypeEx)condition()).typeCheck(tenv);
+            TypeInfo condType = ((AstTreeTypeEx)condition()).typeCheck(tenv);
             condType.assertSubtypeOf(TypeInfo.INT, tenv, this);
-            TypeInfo bodyType = ((ASTreeTypeEx)body()).typeCheck(tenv);
+            TypeInfo bodyType = ((AstTreeTypeEx)body()).typeCheck(tenv);
             return bodyType.union(TypeInfo.INT, tenv);
         }
     }
-    @Reviser public static class DefStmntEx2 extends TypedEvaluator.DefStmntEx {
+    @Reviser public static class DefStateEx2 extends TypedEvaluator.DefStateEx {
         protected TypeInfo.FunctionType funcType;
         protected TypeEnv bodyEnv;
-        public DefStmntEx2(List<ASTree> c) { super(c); }
+        public DefStateEx2(List<AstTree> c) { super(c); }
         public TypeInfo typeCheck(TypeEnv tenv) throws TypeException {
             TypeInfo[] params = ((ParamListEx2)parameters()).types();
             TypeInfo retType = TypeInfo.get(type());
@@ -142,14 +142,14 @@ import javassist.gluonj.*;
             for (int i = 0; i < params.length; i++)
                 bodyEnv.put(0, i, params[i]);
             TypeInfo bodyType
-                = ((ASTreeTypeEx)revise(body())).typeCheck(bodyEnv);
+                = ((AstTreeTypeEx)revise(body())).typeCheck(bodyEnv);
             bodyType.assertSubtypeOf(retType, tenv, this);
             return funcType;
         }
     }
     @Reviser
     public static class ParamListEx2 extends TypedEvaluator.ParamListEx {
-        public ParamListEx2(List<ASTree> c) { super(c); }
+        public ParamListEx2(List<AstTree> c) { super(c); }
         public TypeInfo[] types() throws TypeException {
             int s = size();
             TypeInfo[] result = new TypeInfo[s];
@@ -159,7 +159,7 @@ import javassist.gluonj.*;
         }
     }
     @Reviser public static class PrimaryEx2 extends FuncEvaluator.PrimaryEx {
-        public PrimaryEx2(List<ASTree> c) { super(c); }
+        public PrimaryEx2(List<AstTree> c) { super(c); }
         public TypeInfo typeCheck(TypeEnv tenv) throws TypeException {
             return typeCheck(tenv, 0);
         }
@@ -169,18 +169,18 @@ import javassist.gluonj.*;
                 return ((PostfixEx)postfix(nest)).typeCheck(tenv, target); 
             }
             else
-                return ((ASTreeTypeEx)operand()).typeCheck(tenv);
+                return ((AstTreeTypeEx)operand()).typeCheck(tenv);
         }
     }
     @Reviser public static abstract class PostfixEx extends Postfix {
-        public PostfixEx(List<ASTree> c) { super(c); }
+        public PostfixEx(List<AstTree> c) { super(c); }
         public abstract TypeInfo typeCheck(TypeEnv tenv, TypeInfo target)
             throws TypeException;
     }
     @Reviser public static class ArgumentsEx extends Arguments {
         protected TypeInfo[] argTypes;
         protected TypeInfo.FunctionType funcType;
-        public ArgumentsEx(List<ASTree> c) { super(c); }
+        public ArgumentsEx(List<AstTree> c) { super(c); }
         public TypeInfo typeCheck(TypeEnv tenv, TypeInfo target)
             throws TypeException
         {
@@ -192,22 +192,22 @@ import javassist.gluonj.*;
                 throw new TypeException("bad number of arguments", this);
             argTypes = new TypeInfo[params.length];
             int num = 0;
-            for (ASTree a: this) {
-                TypeInfo t = argTypes[num] = ((ASTreeTypeEx)a).typeCheck(tenv);
+            for (AstTree a: this) {
+                TypeInfo t = argTypes[num] = ((AstTreeTypeEx)a).typeCheck(tenv);
                 t.assertSubtypeOf(params[num++], tenv, this);
             }
             return funcType.returnType;
         }
     }
-    @Reviser public static class VarStmntEx2 extends TypedEvaluator.VarStmntEx {
+    @Reviser public static class VarStateEx2 extends TypedEvaluator.VarStateEx {
         protected TypeInfo varType, valueType;
-        public VarStmntEx2(List<ASTree> c) { super(c); }
+        public VarStateEx2(List<AstTree> c) { super(c); }
         public TypeInfo typeCheck(TypeEnv tenv) throws TypeException {
             if (tenv.get(0, index) != null)
                 throw new TypeException("duplicate variable: " + name(), this);
             varType = TypeInfo.get(type());
             tenv.put(0, index, varType);
-            valueType = ((ASTreeTypeEx)initializer()).typeCheck(tenv);
+            valueType = ((AstTreeTypeEx)initializer()).typeCheck(tenv);
             valueType.assertSubtypeOf(varType, tenv, this);
             return varType;
         }

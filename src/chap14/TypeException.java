@@ -1,8 +1,8 @@
 package chap14;
-import stone.ast.ASTree;
+import stone.ast.AstTree;
 
 public class TypeException extends Exception {
-    public TypeException(String msg, ASTree t) {
+    public TypeException(String msg, AstTree t) {
         super(msg + " " + t.location()); 
     }
 }

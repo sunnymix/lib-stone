@@ -19,19 +19,19 @@ import chap7.ClosureEvaluator;
         void putNew(String name, Object value);
         Environment where(String name);
     }
-    @Reviser public static abstract class ASTreeOptEx extends ASTree {
+    @Reviser public static abstract class AstTreeOptEx extends AstTree {
         public void lookup(Symbols syms) {}
     }
-    @Reviser public static class ASTListEx extends ASTList {
-        public ASTListEx(List<ASTree> c) { super(c); }
+    @Reviser public static class AstListEx extends AstList {
+        public AstListEx(List<AstTree> c) { super(c); }
         public void lookup(Symbols syms) {
-            for (ASTree t: this)
-                ((ASTreeOptEx)t).lookup(syms);
+            for (AstTree t: this)
+                ((AstTreeOptEx)t).lookup(syms);
         }
     }
-    @Reviser public static class DefStmntEx extends DefStmnt {
+    @Reviser public static class DefStateEx extends DefState {
         protected int index, size;
-        public DefStmntEx(List<ASTree> c) { super(c); }
+        public DefStateEx(List<AstTree> c) { super(c); }
         public void lookup(Symbols syms) {
             index = syms.putNew(name());
             size = FunEx.lookup(syms, parameters(), body());
@@ -44,7 +44,7 @@ import chap7.ClosureEvaluator;
     }
     @Reviser public static class FunEx extends Fun {
         protected int size = -1;
-        public FunEx(List<ASTree> c) { super(c); }
+        public FunEx(List<AstTree> c) { super(c); }
         public void lookup(Symbols syms) {
             size = lookup(syms, parameters(), body());
         }
@@ -52,17 +52,17 @@ import chap7.ClosureEvaluator;
             return new OptFunction(parameters(), body(), env, size);
         }
         public static int lookup(Symbols syms, ParameterList params,
-                                 BlockStmnt body)
+                                 BlockState body)
         {
             Symbols newSyms = new Symbols(syms);
             ((ParamsEx)params).lookup(newSyms);
-            ((ASTreeOptEx)revise(body)).lookup(newSyms);
+            ((AstTreeOptEx)revise(body)).lookup(newSyms);
             return newSyms.size();
         }
     }
     @Reviser public static class ParamsEx extends ParameterList {
         protected int[] offsets = null;
-        public ParamsEx(List<ASTree> c) { super(c); }
+        public ParamsEx(List<AstTree> c) { super(c); }
         public void lookup(Symbols syms) {
             int s = size();
             offsets = new int[s];
@@ -105,22 +105,22 @@ import chap7.ClosureEvaluator;
         }
     }
     @Reviser public static class BinaryEx2 extends BasicEvaluator.BinaryEx {
-        public BinaryEx2(List<ASTree> c) { super(c); }
+        public BinaryEx2(List<AstTree> c) { super(c); }
         public void lookup(Symbols syms) {
-            ASTree left = left();
+            AstTree left = left();
             if ("=".equals(operator())) {
                 if (left instanceof Name) {
                     ((NameEx)left).lookupForAssign(syms);
-                    ((ASTreeOptEx)right()).lookup(syms);
+                    ((AstTreeOptEx)right()).lookup(syms);
                     return;
                 }
             }
-            ((ASTreeOptEx)left).lookup(syms);
-            ((ASTreeOptEx)right()).lookup(syms);
+            ((AstTreeOptEx)left).lookup(syms);
+            ((AstTreeOptEx)right()).lookup(syms);
         }
         @Override
         protected Object computeAssign(Environment env, Object rvalue) {
-            ASTree l = left();
+            AstTree l = left();
             if (l instanceof Name) {
                 ((NameEx)l).evalForAssign(env, rvalue);
                 return rvalue;

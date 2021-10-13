@@ -4,7 +4,7 @@ import stone.ast.*;
 
 public class TypedParser extends FuncParser {
     Parser typeTag = rule(TypeTag.class).sep(":").identifier(reserved);
-    Parser variable = rule(VarStmnt.class)
+    Parser variable = rule(VarState.class)
                           .sep("var").identifier(reserved).maybe(typeTag)
                           .sep("=").ast(expr);
     public TypedParser() {

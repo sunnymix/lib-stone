@@ -5,8 +5,8 @@ import stone.Lexer;
 import stone.Token;
 import stone.TypedParser;
 import stone.ParseException;
-import stone.ast.ASTree;
-import stone.ast.NullStmnt;
+import stone.ast.AstTree;
+import stone.ast.NullState;
 import chap11.EnvOptimizer;
 import chap11.ResizableArrayEnv;
 import chap6.BasicEvaluator;
@@ -24,13 +24,13 @@ public class TypedInterpreter {
     {
         Lexer lexer = new Lexer(new CodeDialog());
         while (lexer.peek(0) != Token.EOF) {
-            ASTree tree = bp.parse(lexer);
-            if (!(tree instanceof NullStmnt)) {
-                ((EnvOptimizer.ASTreeOptEx)tree).lookup(
+            AstTree tree = bp.parse(lexer);
+            if (!(tree instanceof NullState)) {
+                ((EnvOptimizer.AstTreeOptEx)tree).lookup(
                                         ((EnvOptimizer.EnvEx2)env).symbols());
                 TypeInfo type
-                    = ((TypeChecker.ASTreeTypeEx)tree).typeCheck(typeEnv);
-                Object r = ((BasicEvaluator.ASTreeEx)tree).eval(env);
+                    = ((TypeChecker.AstTreeTypeEx)tree).typeCheck(typeEnv);
+                Object r = ((BasicEvaluator.AstTreeEx)tree).eval(env);
                 System.out.println("=> " + r + " : " + type);
             }
         }

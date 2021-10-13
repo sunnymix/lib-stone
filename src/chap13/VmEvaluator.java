@@ -4,7 +4,7 @@ import stone.StoneException;
 import stone.Token;
 import chap11.EnvOptimizer;
 import chap6.Environment;
-import chap6.BasicEvaluator.ASTreeEx;
+import chap6.BasicEvaluator.AstTreeEx;
 import chap7.FuncEvaluator;
 import javassist.gluonj.*;
 import static chap13.Opcode.*;
@@ -17,18 +17,18 @@ import stone.ast.*;
         StoneVM stoneVM();
         Code code();
     }
-    @Reviser public static abstract class ASTreeVmEx extends ASTree {
+    @Reviser public static abstract class AstTreeVmEx extends AstTree {
         public void compile(Code c) {}
     }
-    @Reviser public static class ASTListEx extends ASTList {
-        public ASTListEx(List<ASTree> c) { super(c); }
+    @Reviser public static class AstListEx extends AstList {
+        public AstListEx(List<AstTree> c) { super(c); }
         public void compile(Code c) {
-            for (ASTree t: this)
-                ((ASTreeVmEx)t).compile(c);
+            for (AstTree t: this)
+                ((AstTreeVmEx)t).compile(c);
         }
     }
-    @Reviser public static class DefStmntVmEx extends EnvOptimizer.DefStmntEx {
-        public DefStmntVmEx(List<ASTree> c) { super(c); }
+    @Reviser public static class DefStateVmEx extends EnvOptimizer.DefStateEx {
+        public DefStateVmEx(List<AstTree> c) { super(c); }
         @Override public Object eval(Environment env) {
             String funcName = name();
             EnvEx3 vmenv = (EnvEx3)env;
@@ -44,7 +44,7 @@ import stone.ast.*;
             c.frameSize = size + StoneVM.SAVE_AREA_SIZE;
             c.add(SAVE);
             c.add(encodeOffset(size));
-            ((ASTreeVmEx)revise(body())).compile(c);
+            ((AstTreeVmEx)revise(body())).compile(c);
             c.add(MOVE);
             c.add(encodeRegister(c.nextReg - 1));
             c.add(encodeOffset(0));
@@ -54,7 +54,7 @@ import stone.ast.*;
         }
     }
     @Reviser public static class ParamsEx2 extends EnvOptimizer.ParamsEx {
-        public ParamsEx2(List<ASTree> c) { super(c); }
+        public ParamsEx2(List<AstTree> c) { super(c); }
         @Override public void eval(Environment env, int index, Object value) {
             StoneVM vm = ((EnvEx3)env).stoneVM();
             vm.stack()[offsets[index]] = value;
@@ -112,29 +112,29 @@ import stone.ast.*;
         }
     }
     @Reviser public static class NegativeEx extends NegativeExpr {
-        public NegativeEx(List<ASTree> c) { super(c); }
+        public NegativeEx(List<AstTree> c) { super(c); }
         public void compile(Code c) {
-            ((ASTreeVmEx)operand()).compile(c);
+            ((AstTreeVmEx)operand()).compile(c);
             c.add(NEG);
             c.add(encodeRegister(c.nextReg - 1));   
         }
     }
     @Reviser public static class BinaryEx extends BinaryExpr {
-        public BinaryEx(List<ASTree> c) { super(c); }
+        public BinaryEx(List<AstTree> c) { super(c); }
         public void compile(Code c) {
             String op = operator();
             if (op.equals("=")) {
-                ASTree l = left();
+                AstTree l = left();
                 if (l instanceof Name) {
-                    ((ASTreeVmEx)right()).compile(c);
+                    ((AstTreeVmEx)right()).compile(c);
                     ((NameEx2)l).compileAssign(c);
                 }
                 else
                     throw new StoneException("bad assignment", this);
             }
             else {
-                ((ASTreeVmEx)left()).compile(c);
-                ((ASTreeVmEx)right()).compile(c);
+                ((AstTreeVmEx)left()).compile(c);
+                ((AstTreeVmEx)right()).compile(c);
                 c.add(getOpcode(op));
                 c.add(encodeRegister(c.nextReg - 2));
                 c.add(encodeRegister(c.nextReg - 1));
@@ -163,26 +163,26 @@ import stone.ast.*;
         }
     }
     @Reviser public static class PrimaryVmEx extends FuncEvaluator.PrimaryEx {
-        public PrimaryVmEx(List<ASTree> c) { super(c); }
+        public PrimaryVmEx(List<AstTree> c) { super(c); }
         public void compile(Code c) {
             compileSubExpr(c, 0);
         }
         public void compileSubExpr(Code c, int nest) {
             if (hasPostfix(nest)) {
                 compileSubExpr(c, nest + 1);
-                ((ASTreeVmEx)revise(postfix(nest))).compile(c);
+                ((AstTreeVmEx)revise(postfix(nest))).compile(c);
             }
             else
-                ((ASTreeVmEx)operand()).compile(c);
+                ((AstTreeVmEx)operand()).compile(c);
         }
     }
     @Reviser public static class ArgumentsEx extends Arguments {
-        public ArgumentsEx(List<ASTree> c) { super(c); }
+        public ArgumentsEx(List<AstTree> c) { super(c); }
         public void compile(Code c) {
             int newOffset = c.frameSize;
             int numOfArgs = 0;
-            for (ASTree a: this) {
-                ((ASTreeVmEx)a).compile(c);
+            for (AstTree a: this) {
+                ((AstTreeVmEx)a).compile(c);
                 c.add(MOVE);
                 c.add(encodeRegister(--c.nextReg));
                 c.add(encodeOffset(newOffset++));
@@ -203,21 +203,21 @@ import stone.ast.*;
             if (size() != params.size())
                 throw new StoneException("bad number of arguments", this);
             int num = 0;
-            for (ASTree a: this)
-                ((ParamsEx2)params).eval(env, num++, ((ASTreeEx)a).eval(env)); 
+            for (AstTree a: this)
+                ((ParamsEx2)params).eval(env, num++, ((AstTreeEx)a).eval(env));
             StoneVM svm = ((EnvEx3)env).stoneVM();
             svm.run(func.entry());
             return svm.stack()[0];
         }
     }
-    @Reviser public static class BlockEx extends BlockStmnt {
-        public BlockEx(List<ASTree> c) { super(c); }
+    @Reviser public static class BlockEx extends BlockState {
+        public BlockEx(List<AstTree> c) { super(c); }
         public void compile(Code c) {
             if (this.numChildren() > 0) {
                 int initReg = c.nextReg;
-                for (ASTree a: this) {
+                for (AstTree a: this) {
                     c.nextReg = initReg;
-                    ((ASTreeVmEx)a).compile(c);
+                    ((AstTreeVmEx)a).compile(c);
                 }
             }
             else {
@@ -227,24 +227,24 @@ import stone.ast.*;
             }
         }
     }
-    @Reviser public static class IfEx extends IfStmnt {
-        public IfEx(List<ASTree> c) { super(c); }
+    @Reviser public static class IfEx extends IfState {
+        public IfEx(List<AstTree> c) { super(c); }
         public void compile(Code c) {
-            ((ASTreeVmEx)condition()).compile(c);
+            ((AstTreeVmEx)condition()).compile(c);
             int pos = c.position();
             c.add(IFZERO);
             c.add(encodeRegister(--c.nextReg));
             c.add(encodeShortOffset(0));
             int oldReg = c.nextReg;
-            ((ASTreeVmEx)thenBlock()).compile(c);
+            ((AstTreeVmEx)thenBlock()).compile(c);
             int pos2 = c.position();
             c.add(GOTO);
             c.add(encodeShortOffset(0));
             c.set(encodeShortOffset(c.position() - pos), pos + 2);
-            ASTree b = elseBlock();
+            AstTree b = elseBlock();
             c.nextReg = oldReg;
             if (b != null)
-                ((ASTreeVmEx)b).compile(c);
+                ((AstTreeVmEx)b).compile(c);
             else {
                 c.add(BCONST);
                 c.add((byte)0);
@@ -253,21 +253,21 @@ import stone.ast.*;
             c.set(encodeShortOffset(c.position() - pos2), pos2 + 1);
         }
     }
-    @Reviser public static class WhileEx extends WhileStmnt {
-        public WhileEx(List<ASTree> c) { super(c); }
+    @Reviser public static class WhileEx extends WhileState {
+        public WhileEx(List<AstTree> c) { super(c); }
         public void compile(Code c) {
             int oldReg = c.nextReg;
             c.add(BCONST);
             c.add((byte)0);
             c.add(encodeRegister(c.nextReg++));
             int pos = c.position();
-            ((ASTreeVmEx)condition()).compile(c);
+            ((AstTreeVmEx)condition()).compile(c);
             int pos2 = c.position();
             c.add(IFZERO);
             c.add(encodeRegister(--c.nextReg));
             c.add(encodeShortOffset(0));
             c.nextReg = oldReg;
-            ((ASTreeVmEx)body()).compile(c);
+            ((AstTreeVmEx)body()).compile(c);
             int pos3= c.position();
             c.add(GOTO);
             c.add(encodeShortOffset(pos - pos3));

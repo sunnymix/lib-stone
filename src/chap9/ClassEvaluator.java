@@ -4,7 +4,7 @@ import stone.StoneException;
 import javassist.gluonj.*;
 import stone.ast.*;
 import chap6.Environment;
-import chap6.BasicEvaluator.ASTreeEx;
+import chap6.BasicEvaluator.AstTreeEx;
 import chap6.BasicEvaluator;
 import chap7.FuncEvaluator;
 import chap7.NestedEnv;
@@ -14,8 +14,8 @@ import chap9.StoneObject.AccessException;
 
 @Require(FuncEvaluator.class)
 @Reviser public class ClassEvaluator {
-    @Reviser public static class ClassStmntEx extends ClassStmnt {
-        public ClassStmntEx(List<ASTree> c) { super(c); }
+    @Reviser public static class ClassStateEx extends ClassState {
+        public ClassStateEx(List<AstTree> c) { super(c); }
         public Object eval(Environment env) {
             ClassInfo ci = new ClassInfo(this, env);
             ((EnvEx)env).put(name(), ci);
@@ -23,15 +23,15 @@ import chap9.StoneObject.AccessException;
         }
     }
     @Reviser public static class ClassBodyEx extends ClassBody {
-        public ClassBodyEx(List<ASTree> c) { super(c); }
+        public ClassBodyEx(List<AstTree> c) { super(c); }
         public Object eval(Environment env) {
-            for (ASTree t: this)
-                ((ASTreeEx)t).eval(env);
+            for (AstTree t: this)
+                ((AstTreeEx)t).eval(env);
             return null;
         }
     }
     @Reviser public static class DotEx extends Dot {
-        public DotEx(List<ASTree> c) { super(c); }
+        public DotEx(List<AstTree> c) { super(c); }
         public Object eval(Environment env, Object value) {
             String member = name();
             if (value instanceof ClassInfo) {
@@ -58,10 +58,10 @@ import chap9.StoneObject.AccessException;
         }
     }
     @Reviser public static class AssignEx extends BasicEvaluator.BinaryEx {
-        public AssignEx(List<ASTree> c) { super(c); }
+        public AssignEx(List<AstTree> c) { super(c); }
         @Override
         protected Object computeAssign(Environment env, Object rvalue) {
-            ASTree le = left();
+            AstTree le = left();
             if (le instanceof PrimaryExpr) {
                 PrimaryEx p = (PrimaryEx)le;
                 if (p.hasPostfix(0) && p.postfix(0) instanceof Dot) {

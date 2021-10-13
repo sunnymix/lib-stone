@@ -1,5 +1,5 @@
 package chap5;
-import stone.ast.ASTree;
+import stone.ast.AstTree;
 import stone.*;
 
 public class ParserRunner {
@@ -7,7 +7,7 @@ public class ParserRunner {
         Lexer l = new Lexer(new CodeDialog());
         BasicParser bp = new BasicParser();
         while (l.peek(0) != Token.EOF) {
-            ASTree ast = bp.parse(l);
+            AstTree ast = bp.parse(l);
             System.out.println("=> " + ast.toString());
         }
     }

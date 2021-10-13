@@ -1,5 +1,5 @@
 package chap12;
-import stone.ast.BlockStmnt;
+import stone.ast.BlockState;
 import stone.ast.ParameterList;
 import chap11.ArrayEnv;
 import chap11.OptFunction;
@@ -7,7 +7,7 @@ import chap6.Environment;
 
 public class OptMethod extends OptFunction {
     OptStoneObject self;
-    public OptMethod(ParameterList parameters, BlockStmnt body,
+    public OptMethod(ParameterList parameters, BlockState body,
                      Environment env, int memorySize, OptStoneObject self)
     {
         super(parameters, body, env, memorySize);

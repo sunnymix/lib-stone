@@ -1,7 +1,7 @@
 package stone;
 import static stone.Parser.rule;
 import stone.ast.ClassBody;
-import stone.ast.ClassStmnt;
+import stone.ast.ClassState;
 import stone.ast.Dot;
 
 public class ClassParser extends ClosureParser {
@@ -9,7 +9,7 @@ public class ClassParser extends ClosureParser {
     Parser class_body = rule(ClassBody.class).sep("{").option(member)
                             .repeat(rule().sep(";", Token.EOL).option(member))
                             .sep("}");
-    Parser defclass = rule(ClassStmnt.class).sep("class").identifier(reserved)
+    Parser defclass = rule(ClassState.class).sep("class").identifier(reserved)
                           .option(rule().sep("extends").identifier(reserved))
                           .ast(class_body);
     public ClassParser() {

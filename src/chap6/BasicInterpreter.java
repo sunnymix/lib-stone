@@ -1,7 +1,7 @@
 package chap6;
 import stone.*;
-import stone.ast.ASTree;
-import stone.ast.NullStmnt;
+import stone.ast.AstTree;
+import stone.ast.NullState;
 
 public class BasicInterpreter {
     public static void main(String[] args) throws ParseException {
@@ -12,9 +12,9 @@ public class BasicInterpreter {
     {
         Lexer lexer = new Lexer(new CodeDialog());
         while (lexer.peek(0) != Token.EOF) {
-            ASTree t = bp.parse(lexer);
-            if (!(t instanceof NullStmnt)) {
-                Object r = ((BasicEvaluator.ASTreeEx)t).eval(env);
+            AstTree t = bp.parse(lexer);
+            if (!(t instanceof NullState)) {
+                Object r = ((BasicEvaluator.AstTreeEx)t).eval(env);
                 System.out.println("=> " + r);
             }
         }

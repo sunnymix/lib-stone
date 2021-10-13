@@ -1,14 +1,14 @@
 package chap9;
 import stone.StoneException;
 import stone.ast.ClassBody;
-import stone.ast.ClassStmnt;
+import stone.ast.ClassState;
 import chap6.Environment;
 
 public class ClassInfo {
-    protected ClassStmnt definition;
+    protected ClassState definition;
     protected Environment environment;
     protected ClassInfo superClass;
-    public ClassInfo(ClassStmnt cs, Environment env) {
+    public ClassInfo(ClassState cs, Environment env) {
         definition = cs;
         environment = env;
         Object obj = env.get(cs.superClass());

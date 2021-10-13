@@ -3,14 +3,14 @@ import java.util.List;
 import chap14.TypeInfo.FunctionType;
 import chap14.TypeInfo.UnknownType;
 import chap14.InferTypes.UnknownTypeEx;
-import stone.ast.ASTree;
+import stone.ast.AstTree;
 import javassist.gluonj.Require;
 import javassist.gluonj.Reviser;
 
 @Require({TypeChecker.class, InferTypes.class})
 @Reviser public class InferFuncTypes {
-    @Reviser public static class DefStmntEx3 extends TypeChecker.DefStmntEx2 {
-        public DefStmntEx3(List<ASTree> c) { super(c); }
+    @Reviser public static class DefStateEx3 extends TypeChecker.DefStateEx2 {
+        public DefStateEx3(List<AstTree> c) { super(c); }
         @Override public TypeInfo typeCheck(TypeEnv tenv) throws TypeException {
             FunctionType func = super.typeCheck(tenv).toFunctionType();
             for (TypeInfo t: func.parameterTypes)

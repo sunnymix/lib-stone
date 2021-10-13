@@ -26,17 +26,17 @@ public class OpPrecedenceParser {
         operators.put("/", new Precedence(3, true));
         operators.put("^", new Precedence(4, false));
     }
-    public ASTree expression() throws ParseException {
-        ASTree right = factor();
+    public AstTree expression() throws ParseException {
+        AstTree right = factor();
         Precedence next;
         while ((next = nextOperator()) != null)
             right = doShift(right, next.value);
 
         return right;
     }
-    private ASTree doShift(ASTree left, int prec) throws ParseException {
-        ASTLeaf op = new ASTLeaf(lexer.read());
-        ASTree right = factor();
+    private AstTree doShift(AstTree left, int prec) throws ParseException {
+        AstLeaf op = new AstLeaf(lexer.read());
+        AstTree right = factor();
         Precedence next;
         while ((next = nextOperator()) != null && rightIsExpr(prec, next))
             right = doShift(right, next.value);
@@ -56,10 +56,10 @@ public class OpPrecedenceParser {
         else
             return prec <= nextPrec.value;
     }
-    public ASTree factor() throws ParseException {
+    public AstTree factor() throws ParseException {
         if (isToken("(")) {
             token("(");
-            ASTree e = expression();
+            AstTree e = expression();
             token(")");
             return e;
         }
@@ -85,7 +85,7 @@ public class OpPrecedenceParser {
     public static void main(String[] args) throws ParseException {
         Lexer lexer = new Lexer(new CodeDialog());
         OpPrecedenceParser p = new OpPrecedenceParser(lexer);
-        ASTree t = p.expression();
+        AstTree t = p.expression();
         System.out.println("=> " + t);
     }
 }

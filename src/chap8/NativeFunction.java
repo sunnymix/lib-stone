@@ -1,7 +1,7 @@
 package chap8;
 import java.lang.reflect.Method;
 import stone.StoneException;
-import stone.ast.ASTree;
+import stone.ast.AstTree;
 
 public class NativeFunction {
     protected Method method;
@@ -14,7 +14,7 @@ public class NativeFunction {
     }
     @Override public String toString() { return "<native:" + hashCode() + ">"; }
     public int numOfParameters() { return numParams; } 
-    public Object invoke(Object[] args, ASTree tree) {
+    public Object invoke(Object[] args, AstTree tree) {
         try {
             return method.invoke(null, args);
         } catch (Exception e) {

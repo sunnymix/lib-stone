@@ -2,6 +2,6 @@ package stone.ast;
 
 import java.util.List;
 
-public abstract class Postfix extends ASTList {
-    public Postfix(List<ASTree> c) { super(c); }
+public abstract class Postfix extends AstList {
+    public Postfix(List<AstTree> c) { super(c); }
 }

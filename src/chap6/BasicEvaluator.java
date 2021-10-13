@@ -8,17 +8,17 @@ import java.util.List;
 @Reviser public class BasicEvaluator {
     public static final int TRUE = 1;
     public static final int FALSE = 0;
-    @Reviser public static abstract class ASTreeEx extends ASTree {
+    @Reviser public static abstract class AstTreeEx extends AstTree {
         public abstract Object eval(Environment env);
     }
-    @Reviser public static class ASTListEx extends ASTList {
-        public ASTListEx(List<ASTree> c) { super(c); }
+    @Reviser public static class AstListEx extends AstList {
+        public AstListEx(List<AstTree> c) { super(c); }
         public Object eval(Environment env) {
             throw new StoneException("cannot eval: " + toString(), this);
         }
     }
-    @Reviser public static class ASTLeafEx extends ASTLeaf {
-        public ASTLeafEx(Token t) { super(t); }
+    @Reviser public static class AstLeafEx extends AstLeaf {
+        public AstLeafEx(Token t) { super(t); }
         public Object eval(Environment env) {
             throw new StoneException("cannot eval: " + toString(), this);
         }
@@ -42,9 +42,9 @@ import java.util.List;
         }
     }
     @Reviser public static class NegativeEx extends NegativeExpr {
-        public NegativeEx(List<ASTree> c) { super(c); }
+        public NegativeEx(List<AstTree> c) { super(c); }
         public Object eval(Environment env) {
-            Object v = ((ASTreeEx)operand()).eval(env);
+            Object v = ((AstTreeEx)operand()).eval(env);
             if (v instanceof Integer)
                 return new Integer(-((Integer)v).intValue());
             else
@@ -52,21 +52,21 @@ import java.util.List;
         }
     }
     @Reviser public static class BinaryEx extends BinaryExpr {
-        public BinaryEx(List<ASTree> c) { super(c); }
+        public BinaryEx(List<AstTree> c) { super(c); }
         public Object eval(Environment env) {
             String op = operator();
             if ("=".equals(op)) {
-                Object right = ((ASTreeEx)right()).eval(env);
+                Object right = ((AstTreeEx)right()).eval(env);
                 return computeAssign(env, right);
             }
             else {
-                Object left = ((ASTreeEx)left()).eval(env);
-                Object right = ((ASTreeEx)right()).eval(env);
+                Object left = ((AstTreeEx)left()).eval(env);
+                Object right = ((AstTreeEx)right()).eval(env);
                 return computeOp(left, op, right);
             }
         }
         protected Object computeAssign(Environment env, Object rvalue) {
-            ASTree l = left();
+            AstTree l = left();
             if (l instanceof Name) {
                 env.put(((Name)l).name(), rvalue);
                 return rvalue;
@@ -113,42 +113,42 @@ import java.util.List;
                 throw new StoneException("bad operator", this);
         }
     }
-    @Reviser public static class BlockEx extends BlockStmnt {
-        public BlockEx(List<ASTree> c) { super(c); }
+    @Reviser public static class BlockEx extends BlockState {
+        public BlockEx(List<AstTree> c) { super(c); }
         public Object eval(Environment env) {
             Object result = 0;
-            for (ASTree t: this) {
-                if (!(t instanceof NullStmnt))
-                    result = ((ASTreeEx)t).eval(env);
+            for (AstTree t: this) {
+                if (!(t instanceof NullState))
+                    result = ((AstTreeEx)t).eval(env);
             }
             return result;
         }
     }
-    @Reviser public static class IfEx extends IfStmnt {
-        public IfEx(List<ASTree> c) { super(c); }
+    @Reviser public static class IfEx extends IfState {
+        public IfEx(List<AstTree> c) { super(c); }
         public Object eval(Environment env) {
-            Object c = ((ASTreeEx)condition()).eval(env);
+            Object c = ((AstTreeEx)condition()).eval(env);
             if (c instanceof Integer && ((Integer)c).intValue() != FALSE)
-                return ((ASTreeEx)thenBlock()).eval(env);
+                return ((AstTreeEx)thenBlock()).eval(env);
             else {
-                ASTree b = elseBlock();
+                AstTree b = elseBlock();
                 if (b == null)
                     return 0;
                 else
-                    return ((ASTreeEx)b).eval(env);
+                    return ((AstTreeEx)b).eval(env);
             }
         }
     }
-    @Reviser public static class WhileEx extends WhileStmnt {
-        public WhileEx(List<ASTree> c) { super(c); }
+    @Reviser public static class WhileEx extends WhileState {
+        public WhileEx(List<AstTree> c) { super(c); }
         public Object eval(Environment env) {
             Object result = 0;
             for (;;) {
-                Object c = ((ASTreeEx)condition()).eval(env);
+                Object c = ((AstTreeEx)condition()).eval(env);
                 if (c instanceof Integer && ((Integer)c).intValue() == FALSE)
                     return result;
                 else
-                    result = ((ASTreeEx)body()).eval(env);
+                    result = ((AstTreeEx)body()).eval(env);
             }
         }
     }

@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 import chap11.ArrayEnv;
 import chap11.EnvOptimizer;
+import chap6.BasicEvaluator;
 import chap6.Environment;
 import chap7.FuncEvaluator;
 import stone.StoneException;
@@ -20,8 +21,8 @@ import static javassist.gluonj.GluonJ.revise;
     public static final String RESULT = "res";
     public static final String ENV_TYPE = "chap11.ArrayEnv";
 
-    public static String translateExpr(ASTree ast, TypeInfo from, TypeInfo to) {
-        return translateExpr(((ASTreeEx)ast).translate(null), from, to);
+    public static String translateExpr(AstTree ast, TypeInfo from, TypeInfo to) {
+        return translateExpr(((AstTreeEx)ast).translate(null), from, to);
     }
     public static String translateExpr(String expr, TypeInfo from,
                                        TypeInfo to)
@@ -56,7 +57,7 @@ import static javassist.gluonj.GluonJ.revise;
         protected JavaLoader jloader = new JavaLoader();
         public JavaLoader javaLoader() { return jloader; }
     }
-    @Reviser public static abstract class ASTreeEx extends ASTree {
+    @Reviser public static abstract class AstTreeEx extends AstTree {
         public String translate(TypeInfo result) { return ""; }
     }
     @Reviser public static class NumberEx extends NumberLiteral {
@@ -98,25 +99,25 @@ import static javassist.gluonj.GluonJ.revise;
                 return translateExpr(expr, TypeInfo.ANY, type);
             }
         }
-        public String translateAssign(TypeInfo valueType, ASTree right) {
+        public String translateAssign(TypeInfo valueType, AstTree right) {
             if (nest == 0)
                 return "(" + LOCAL + index + "="
                        + translateExpr(right, valueType, type) + ")";
             else {
-                String value = ((ASTreeEx)right).translate(null);
+                String value = ((AstTreeEx)right).translate(null);
                 return "chap14.Runtime.write" + type.toString()
                        + "(" + ENV + "," + index + "," + value + ")";
             }
         }
     }
     @Reviser public static class NegativeEx extends NegativeExpr {
-        public NegativeEx(List<ASTree> c) { super(c); }
+        public NegativeEx(List<AstTree> c) { super(c); }
         public String translate(TypeInfo result) {
-            return "-" + ((ASTreeEx)operand()).translate(null);
+            return "-" + ((AstTreeEx)operand()).translate(null);
         }
     }
     @Reviser public static class BinaryEx2 extends TypeChecker.BinaryEx {
-        public BinaryEx2(List<ASTree> c) { super(c); }
+        public BinaryEx2(List<AstTree> c) { super(c); }
         public String translate(TypeInfo result) {
             String op = operator();
             if ("=".equals(op))
@@ -138,8 +139,8 @@ import static javassist.gluonj.GluonJ.revise;
                     throw new StoneException("bad operator", this);
             }
             else {
-                String expr = ((ASTreeEx)left()).translate(null) + op
-                              + ((ASTreeEx)right()).translate(null);
+                String expr = ((AstTreeEx)left()).translate(null) + op
+                              + ((AstTreeEx)right()).translate(null);
                 if ("<".equals(op) || ">".equals(op) || "==".equals(op))
                     return "(" + expr + "?1:0)";
                 else
@@ -148,11 +149,11 @@ import static javassist.gluonj.GluonJ.revise;
         }
     }
     @Reviser public static class BlockEx2 extends TypeChecker.BlockEx {
-        public BlockEx2(List<ASTree> c) { super(c); }
+        public BlockEx2(List<AstTree> c) { super(c); }
         public String translate(TypeInfo result) {
-            ArrayList<ASTree> body = new ArrayList<ASTree>();
-            for (ASTree t: this)
-                if (!(t instanceof NullStmnt))
+            ArrayList<AstTree> body = new ArrayList<AstTree>();
+            for (AstTree t: this)
+                if (!(t instanceof NullState))
                     body.add(t);
             StringBuilder code = new StringBuilder();
             if (result != null && body.size() < 1)
@@ -163,52 +164,52 @@ import static javassist.gluonj.GluonJ.revise;
                                    i == body.size() - 1);
             return code.toString();
         }
-        protected void translateStmnt(StringBuilder code, ASTree tree,
+        protected void translateStmnt(StringBuilder code, AstTree tree,
                                       TypeInfo result, boolean last)
         {
             if (isControlStmnt(tree))
-                code.append(((ASTreeEx)tree).translate(last ? result : null));
+                code.append(((AstTreeEx)tree).translate(last ? result : null));
             else 
                 if (last && result != null)
                     code.append(RESULT).append('=')
                         .append(translateExpr(tree, type, result)).append(";\n");
                 else if (isExprStmnt(tree))
-                    code.append(((ASTreeEx)tree).translate(null)).append(";\n");
+                    code.append(((AstTreeEx)tree).translate(null)).append(";\n");
                 else
                     throw new StoneException("bad expression statement", this); 
         }
-        protected static boolean isExprStmnt(ASTree tree) {
+        protected static boolean isExprStmnt(AstTree tree) {
             if (tree instanceof BinaryExpr)
                 return "=".equals(((BinaryExpr)tree).operator());
-            return tree instanceof PrimaryExpr || tree instanceof VarStmnt;
+            return tree instanceof PrimaryExpr || tree instanceof VarState;
         }
-        protected static boolean isControlStmnt(ASTree tree) {
-            return tree instanceof BlockStmnt || tree instanceof IfStmnt
-                   || tree instanceof WhileStmnt;
+        protected static boolean isControlStmnt(AstTree tree) {
+            return tree instanceof BlockState || tree instanceof IfState
+                   || tree instanceof WhileState;
         }
     }
-    @Reviser public static class IfEx extends IfStmnt {
-        public IfEx(List<ASTree> c) { super(c); }
+    @Reviser public static class IfEx extends IfState {
+        public IfEx(List<AstTree> c) { super(c); }
         public String translate(TypeInfo result) {
             StringBuilder code = new StringBuilder();       
             code.append("if(");
-            code.append(((ASTreeEx)condition()).translate(null));
+            code.append(((AstTreeEx)condition()).translate(null));
             code.append("!=0){\n");
-            code.append(((ASTreeEx)thenBlock()).translate(result));
+            code.append(((AstTreeEx)thenBlock()).translate(result));
             code.append("} else {\n");
-            ASTree elseBk = elseBlock();
+            AstTree elseBk = elseBlock();
             if (elseBk != null)
-                code.append(((ASTreeEx)elseBk).translate(result));
+                code.append(((AstTreeEx)elseBk).translate(result));
             else if (result != null)
                 code.append(returnZero(result));
             return code.append("}\n").toString();
         }
     }
-    @Reviser public static class WhileEx extends WhileStmnt {
-        public WhileEx(List<ASTree> c) { super(c); }
+    @Reviser public static class WhileEx extends WhileState {
+        public WhileEx(List<AstTree> c) { super(c); }
         public String translate(TypeInfo result) {
-            String code = "while(" + ((ASTreeEx)condition()).translate(null)
-                          + "!=0){\n" + ((ASTreeEx)body()).translate(result)
+            String code = "while(" + ((AstTreeEx)condition()).translate(null)
+                          + "!=0){\n" + ((AstTreeEx)body()).translate(result)
                           + "}\n";
             if (result == null)
                 return code;
@@ -216,8 +217,8 @@ import static javassist.gluonj.GluonJ.revise;
                 return returnZero(result) + "\n" + code;
         }
     }
-    @Reviser public static class DefStmntEx3 extends TypeChecker.DefStmntEx2 {
-        public DefStmntEx3(List<ASTree> c) { super(c); }
+    @Reviser public static class DefStateEx3 extends TypeChecker.DefStateEx2 {
+        public DefStateEx3(List<AstTree> c) { super(c); }
         @Override public Object eval(Environment env) {
             String funcName = name();
             JavaFunction func = new JavaFunction(funcName, translate(null),
@@ -245,7 +246,7 @@ import static javassist.gluonj.GluonJ.revise;
                 else
                     code.append("=null;\n");
             }
-            code.append(((ASTreeEx)revise(body())).translate(returnType));
+            code.append(((AstTreeEx)revise(body())).translate(returnType));
             code.append("return ").append(RESULT).append(";}");
             return code.toString();
         }
@@ -259,7 +260,7 @@ import static javassist.gluonj.GluonJ.revise;
         }
     }
     @Reviser public static class PrimaryEx2 extends FuncEvaluator.PrimaryEx {
-        public PrimaryEx2(List<ASTree> c) { super(c); }
+        public PrimaryEx2(List<AstTree> c) { super(c); }
         public String translate(TypeInfo result) { return translate(0); }
         public String translate(int nest) {
             if (hasPostfix(nest)) {
@@ -267,15 +268,15 @@ import static javassist.gluonj.GluonJ.revise;
                 return ((PostfixEx)postfix(nest)).translate(expr);
             }
             else
-                return ((ASTreeEx)operand()).translate(null);
+                return ((AstTreeEx)operand()).translate(null);
         }
     }
     @Reviser public static abstract class PostfixEx extends Postfix {
-        public PostfixEx(List<ASTree> c) { super(c); }
+        public PostfixEx(List<AstTree> c) { super(c); }
         public abstract String translate(String expr);
     }
     @Reviser public static class ArgumentsEx extends TypeChecker.ArgumentsEx {
-        public ArgumentsEx(List<ASTree> c) { super(c); }
+        public ArgumentsEx(List<AstTree> c) { super(c); }
         public String translate(String expr) {
             StringBuilder code = new StringBuilder(expr);
             code.append('(').append(ENV);
@@ -292,13 +293,13 @@ import static javassist.gluonj.GluonJ.revise;
             Object[] args = new Object[numChildren() + 1];
             args[0] = env;
             int num = 1;
-            for (ASTree a: this)
-                args[num++] = ((chap6.BasicEvaluator.ASTreeEx)a).eval(env); 
+            for (AstTree a: this)
+                args[num++] = ((BasicEvaluator.AstTreeEx)a).eval(env);
             return func.invoke(args);
         }
     }
-    @Reviser public static class VarStmntEx3 extends TypeChecker.VarStmntEx2 {
-        public VarStmntEx3(List<ASTree> c) { super(c); }
+    @Reviser public static class VarStateEx3 extends TypeChecker.VarStateEx2 {
+        public VarStateEx3(List<AstTree> c) { super(c); }
         public String translate(TypeInfo result) {
             return LOCAL + index + "="
                    + translateExpr(initializer(), valueType, varType);

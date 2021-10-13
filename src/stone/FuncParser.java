@@ -2,14 +2,14 @@ package stone;
 import static stone.Parser.rule;
 import stone.ast.ParameterList;
 import stone.ast.Arguments;
-import stone.ast.DefStmnt;
+import stone.ast.DefState;
 
 public class FuncParser extends BasicParser {
     Parser param = rule().identifier(reserved);
     Parser params = rule(ParameterList.class)
                         .ast(param).repeat(rule().sep(",").ast(param));
     Parser paramList = rule().sep("(").maybe(params).sep(")");
-    Parser def = rule(DefStmnt.class)
+    Parser def = rule(DefState.class)
                      .sep("def").identifier(reserved).ast(paramList).ast(block);
     Parser args = rule(Arguments.class)
                       .ast(expr).repeat(rule().sep(",").ast(expr));

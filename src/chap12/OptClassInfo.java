@@ -1,16 +1,16 @@
 package chap12;
 import java.util.ArrayList;
-import stone.ast.ClassStmnt;
-import stone.ast.DefStmnt;
+import stone.ast.ClassState;
+import stone.ast.DefState;
 import chap11.Symbols;
-import chap12.ObjOptimizer.DefStmntEx2;
+import chap12.ObjOptimizer.DefStateEx2;
 import chap6.Environment;
 import chap9.ClassInfo;
 
 public class OptClassInfo extends ClassInfo {
     protected Symbols methods, fields;
-    protected DefStmnt[] methodDefs;
-    public OptClassInfo(ClassStmnt cs, Environment env, Symbols methods,
+    protected DefState[] methodDefs;
+    public OptClassInfo(ClassState cs, Environment env, Symbols methods,
                         Symbols fields)
     {
         super(cs, env);
@@ -22,20 +22,20 @@ public class OptClassInfo extends ClassInfo {
     @Override public OptClassInfo superClass() {
         return (OptClassInfo)superClass;
     }
-    public void copyTo(Symbols f, Symbols m, ArrayList<DefStmnt> mlist) {
+    public void copyTo(Symbols f, Symbols m, ArrayList<DefState> mlist) {
         f.append(fields);
         m.append(methods);
-        for (DefStmnt def: methodDefs)
+        for (DefState def: methodDefs)
             mlist.add(def);
     }
     public Integer fieldIndex(String name) { return fields.find(name); }
     public Integer methodIndex(String name) { return methods.find(name); }
     public Object method(OptStoneObject self, int index) {
-        DefStmnt def = methodDefs[index];
+        DefState def = methodDefs[index];
         return new OptMethod(def.parameters(), def.body(), environment(),
-                             ((DefStmntEx2)def).locals(), self);
+                             ((DefStateEx2)def).locals(), self);
     }
-    public void setMethods(ArrayList<DefStmnt> methods) {
-        methodDefs = methods.toArray(new DefStmnt[methods.size()]);
+    public void setMethods(ArrayList<DefState> methods) {
+        methodDefs = methods.toArray(new DefState[methods.size()]);
     }
 }

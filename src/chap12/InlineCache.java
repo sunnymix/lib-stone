@@ -1,7 +1,7 @@
 package chap12;
 import java.util.List;
 import stone.StoneException;
-import stone.ast.ASTree;
+import stone.ast.AstTree;
 import stone.ast.Dot;
 import chap6.Environment;
 import javassist.gluonj.*;
@@ -12,7 +12,7 @@ import javassist.gluonj.*;
         protected OptClassInfo classInfo = null;
         protected boolean isField;
         protected int index;
-        public DotEx2(List<ASTree> c) { super(c); }
+        public DotEx2(List<AstTree> c) { super(c); }
         @Override public Object eval(Environment env, Object value) {
             if (value instanceof OptStoneObject) {
                 OptStoneObject target = (OptStoneObject)value;
@@ -47,7 +47,7 @@ import javassist.gluonj.*;
     @Reviser public static class AssignEx2 extends ObjOptimizer.AssignEx {
         protected OptClassInfo classInfo = null;
         protected int index;
-        public AssignEx2(List<ASTree> c) { super(c); }
+        public AssignEx2(List<AstTree> c) { super(c); }
         @Override protected Object setField(OptStoneObject obj, Dot expr,
                                             Object rvalue)
         {

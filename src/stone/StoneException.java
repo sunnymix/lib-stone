@@ -1,9 +1,9 @@
 package stone;
-import stone.ast.ASTree;
+import stone.ast.AstTree;
 
 public class StoneException extends RuntimeException {
     public StoneException(String m) { super(m); }
-    public StoneException(String m, ASTree t) {
+    public StoneException(String m, AstTree t) {
         super(m + " " + t.location());
     }
 }

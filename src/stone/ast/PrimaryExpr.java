@@ -1,9 +1,14 @@
 package stone.ast;
+
 import java.util.List;
 
-public class PrimaryExpr extends ASTList {
-    public PrimaryExpr(List<ASTree> c) { super(c); }
-    public static ASTree create(List<ASTree> c) {
+// OK
+public class PrimaryExpr extends AstList {
+    public PrimaryExpr(List<AstTree> c) {
+        super(c);
+    }
+    
+    public static AstTree create(List<AstTree> c) {
         return c.size() == 1 ? c.get(0) : new PrimaryExpr(c);
     }
 }

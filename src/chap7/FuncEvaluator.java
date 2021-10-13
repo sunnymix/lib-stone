@@ -5,7 +5,7 @@ import stone.StoneException;
 import stone.ast.*;
 import chap6.BasicEvaluator;
 import chap6.Environment;
-import chap6.BasicEvaluator.ASTreeEx;
+import chap6.BasicEvaluator.AstTreeEx;
 import chap6.BasicEvaluator.BlockEx;
 
 @Require(BasicEvaluator.class)
@@ -15,16 +15,16 @@ import chap6.BasicEvaluator.BlockEx;
         Environment where(String name);
         void setOuter(Environment e);
     }
-    @Reviser public static class DefStmntEx extends DefStmnt {
-        public DefStmntEx(List<ASTree> c) { super(c); }
+    @Reviser public static class DefStateEx extends DefState {
+        public DefStateEx(List<AstTree> c) { super(c); }
         public Object eval(Environment env) {
             ((EnvEx)env).putNew(name(), new Function(parameters(), body(), env));
             return name();
         }
     }
     @Reviser public static class PrimaryEx extends PrimaryExpr {
-        public PrimaryEx(List<ASTree> c) { super(c); }
-        public ASTree operand() { return child(0); }
+        public PrimaryEx(List<AstTree> c) { super(c); }
+        public AstTree operand() { return child(0); }
         public Postfix postfix(int nest) {
             return (Postfix)child(numChildren() - nest - 1);
         }
@@ -38,15 +38,15 @@ import chap6.BasicEvaluator.BlockEx;
                 return ((PostfixEx)postfix(nest)).eval(env, target);
             }
             else
-                return ((ASTreeEx)operand()).eval(env);
+                return ((AstTreeEx)operand()).eval(env);
         }
     }
     @Reviser public static abstract class PostfixEx extends Postfix {
-        public PostfixEx(List<ASTree> c) { super(c); }
+        public PostfixEx(List<AstTree> c) { super(c); }
         public abstract Object eval(Environment env, Object value);
     }
     @Reviser public static class ArgumentsEx extends Arguments {
-        public ArgumentsEx(List<ASTree> c) { super(c); }
+        public ArgumentsEx(List<AstTree> c) { super(c); }
         public Object eval(Environment callerEnv, Object value) {
             if (!(value instanceof Function))
                 throw new StoneException("bad function", this);
@@ -56,14 +56,14 @@ import chap6.BasicEvaluator.BlockEx;
                 throw new StoneException("bad number of arguments", this);
             Environment newEnv = func.makeEnv();
             int num = 0;
-            for (ASTree a: this)
+            for (AstTree a: this)
                 ((ParamsEx)params).eval(newEnv, num++,
-                                        ((ASTreeEx)a).eval(callerEnv));
+                                        ((AstTreeEx)a).eval(callerEnv));
             return ((BlockEx)func.body()).eval(newEnv);
         }
     }
     @Reviser public static class ParamsEx extends ParameterList {
-        public ParamsEx(List<ASTree> c) { super(c); }
+        public ParamsEx(List<AstTree> c) { super(c); }
         public void eval(Environment env, int index, Object value) {
             ((EnvEx)env).putNew(name(index), value);
         }
